@@ -199,7 +199,7 @@ x = cumsum(x) + 5473.72
 par(mar = c(2.5,2.5,1,2.5)) #bottom, left, top, and right
 plot.ts(x)
 
-#vedi se si può fare sales in time series grafico
+
 
 
 
