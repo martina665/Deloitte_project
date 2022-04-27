@@ -18,34 +18,32 @@ dati<- read.csv("data.csv", sep=";",stringsAsFactors=FALSE, dec=',', header=TRUE
 #convert to date
 dati$day<- as.Date(dati$day)
 
-#prendiamo dal 1 dicembre 2018 al 31 gennaio 2020
+#1st dember-31st januart
 data<-dati %>% slice(52:1422) 
-#togliamo il mese di aprile 2019
-#new_data<- data[-c(364:453),]
 
-#creiamo weekly sales in cui mettiamo il totale delle sales
+#weekly sales
 library(lubridate)
 library(zoo)
 
-
+#function to transfom daily data into weekly
 dayweek <- function(x)format(x, '%Y.%W')
 weekly_sales<- data%>% group_by(city, dayweek(day)) %>%
   summarise(totsales= sum(sales), day= first(day))
 
-#data pre-processing fino a qui. creazione di weekly sales
+
 
 #MODELING
 #plot the sales from november 2018 to january 2020 before splitting
 #plot the sales 
-ggplot(weekly_sales, aes(day, totsales, color=city))+ #color city può essere
+ggplot(weekly_sales, aes(day, totsales, color=city))+ 
   geom_line()+
   ylab('tot sales x week')+xlab('date')+
   scale_x_date(limits = c(min(weekly_sales$day), max(weekly_sales$day)))
 
 
 #split the dataset
-#test set= january
-#train set= il resto
+#test set= last part of dataset
+#train set= first part of dataset
 mil<- weekly_sales[64:68, 1:4, drop = FALSE]
 nap<-weekly_sales[132:136, 1:4, drop = FALSE]
 rom<-weekly_sales[200:204, 1:4, drop = FALSE]
@@ -54,19 +52,12 @@ test_set<- rbind(mil, rom, nap)
 train_set<- weekly_sales[-c(64:68, 132:136, 200:204), ]
 
 
-#grafico train set delle sales
+#graph of sales on trainset
 train_set %>% 
   ggplot(aes(x=day, y=totsales, color= city))+ geom_line()+ 
   scale_x_date(limits = c(min(train_set$day), max(train_set$day)))
 
-#clean the sales
-#time series cleaned
-#sales_ts<- ts(train_set[,c("totsales")])
-#train_set$clean_sales<-tsclean(sales_ts)
 
-#ggplot(train_set, aes(day, clean_sales, color= city))+
-#geom_line()+ scale_x_date('Time')+
-#ylab('tot sales x week')+xlab('')
 
 #moving average important to understand trend and mean value estimation in data
 train_set$sales_ma<- ma(train_set$totsales, order=7)
@@ -122,12 +113,12 @@ adf.test(sales_deseasonal_milan, alternative='stationary')
 #pacf(sales_d1, main='pacf for difference')
 
 
-###################################ORA ROMA############################
-###################################ORA ROMA#########################
+###################################NOW ROMA############################
+###################################NOW ROMA#########################
 #define the city
 ts_rome<- train_set[127:189, 1:6, drop = FALSE]
 
-#decomposition of MILAN
+#decomposition of Rome
 #ts has seasonality trend and the rest is the error
 #we will use stl
 
@@ -168,7 +159,7 @@ adf.test(sales_differenced, alternative='stationary') #now it is stationary
 #define the city
 ts_naples<- train_set[64:126, 1:6, drop = FALSE]
 
-#decomposition of MILAN
+#decomposition of Naples
 #ts has seasonality trend and the rest is the error
 #we will use stl
 
